@@ -16,11 +16,15 @@
 package com.webank.ai.fate.board.services;
 
 import com.webank.ai.fate.board.pojo.UserDTO;
+import com.webank.ai.fate.board.utils.StandardRSAUtils;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.apache.commons.codec.binary.Hex;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
@@ -28,10 +32,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Properties;
 import java.sql.Timestamp;
-import javax.crypto.spec.SecretKeySpec;
-import javax.crypto.Mac;
+import java.util.Properties;
 
 @Service
 public class UserService {
@@ -75,6 +77,16 @@ public class UserService {
         updateConfig();
         String usernameValue = getValue("server.board.login.username");
         String passwordValue = getValue("server.board.login.password");
+        String privateKey = getValue("server.board.encrypt.private_key");
+        String encrypted = getValue("server.board.encrypt.enable");
+        if (StringUtils.isNotBlank(privateKey) && "true".equalsIgnoreCase(encrypted)) {
+            try {
+                passwordValue = StandardRSAUtils.decryptByPrivateKey(passwordValue, privateKey);
+            } catch (Exception e) {
+                logger.error("decrypt password error");
+                return false;
+            }
+        }
 
         if (!username.equals(usernameValue)) {
             return false;

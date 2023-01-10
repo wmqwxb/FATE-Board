@@ -22,35 +22,26 @@ import com.google.common.collect.Maps;
 import com.webank.ai.fate.board.global.Dict;
 import com.webank.ai.fate.board.global.ErrorCode;
 import com.webank.ai.fate.board.global.ResponseResult;
-import com.webank.ai.fate.board.pojo.*;
 import com.webank.ai.fate.board.log.LogFileService;
-import com.webank.ai.fate.board.pojo.Job;
-import com.webank.ai.fate.board.pojo.JobWithBLOBs;
-import com.webank.ai.fate.board.pojo.PagedJobQO;
+import com.webank.ai.fate.board.pojo.*;
 import com.webank.ai.fate.board.services.JobManagerService;
-import com.webank.ai.fate.board.utils.*;
+import com.webank.ai.fate.board.utils.HttpClientPool;
+import com.webank.ai.fate.board.utils.PageBean;
+import com.webank.ai.fate.board.utils.ResponseUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.FileSystem;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -288,11 +279,14 @@ public class JobManagerController {
             logger.error("connect fateflow error:", e);
             return new ResponseResult<>(ErrorCode.FATEFLOW_ERROR_CONNECTION);
         }
+        if (StringUtils.isBlank(result)) {
+            return new ResponseResult<>(ErrorCode.FATEFLOW_ERROR_CONNECTION);
+        }
         JSONObject resultObject = JSON.parseObject(result);
         Integer retCode = resultObject.getInteger(Dict.RETCODE);
         if (400 == retCode || 401 == retCode || 425 == retCode || 403 == retCode) {
             logger.error(resultObject.getString(Dict.RETMSG));
-            return new ResponseResult<>(retCode,resultObject.getString(Dict.RETMSG));
+            return new ResponseResult<>(retCode, resultObject.getString(Dict.RETMSG));
         }
         return null;
     }

@@ -99,7 +99,7 @@ public class JobManagerController {
 
         String result;
         try {
-            result = flowFeign.get(Dict.URL_JOB_DATAVIEW + jobManagerService.generateURLParamJobQueryDTO(jobQueryDTO));
+            result = flowFeign.get(Dict.URL_JOB_DATAVIEW, jobManagerService.generateURLParamJobQueryDTO(jobQueryDTO));
         } catch (Exception e) {
             logger.error("connect fateflow error:", e);
             return new ResponseResult<>(ErrorCode.FATEFLOW_ERROR_CONNECTION);
@@ -130,15 +130,14 @@ public class JobManagerController {
             jobWithBLOBs.setfStatus(Dict.FAILED);
         }
 
-        Map<String, Object> params = Maps.newHashMap();
-        params.put(Dict.JOBID, jobId);
-        params.put(Dict.ROLE, role);
-        params.put(Dict.PARTY_ID, new Integer(partyId));
-        String reqParam = jobManagerService.generateURLParam(params);
+        Map<String, Object> paramMap = Maps.newHashMap();
+        paramMap.put(Dict.JOBID, jobId);
+        paramMap.put(Dict.ROLE, role);
+        paramMap.put(Dict.PARTY_ID, new Integer(partyId));
 
         String result;
         try {
-            result = flowFeign.get(Dict.URL_JOB_DATAVIEW + reqParam);
+            result = flowFeign.get(Dict.URL_JOB_DATAVIEW, paramMap);
         } catch (Exception e) {
             logger.error("connect fateflow error:", e);
             return new ResponseResult<>(ErrorCode.FATEFLOW_ERROR_CONNECTION);

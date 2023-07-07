@@ -85,10 +85,9 @@ public class JobManagerService {
 
 
     private Map<String, Object> getJobMap(Map<String, Object> params) {
-        String urlParam = generateURLParam(params);
         String result = null;
         try {
-            result = flowFeign.get(Dict.URL_JOB_QUERY + urlParam);
+            result = flowFeign.get(Dict.URL_JOB_QUERY, params);
         } catch (Exception e) {
             logger.error("connect fateflow error:", e);
             LogicException.throwError(ErrorCode.FATEFLOW_ERROR_CONNECTION);
@@ -219,8 +218,7 @@ public class JobManagerService {
                 jobParams.put(Dict.JOBID, jobId1);
                 jobParams.put((Dict.ROLE), role1);
                 jobParams.put(Dict.PARTY_ID, partyId1);
-                String urlParam = generateURLParam(jobParams);
-                String result = flowFeign.get(Dict.URL_JOB_DATAVIEW + urlParam);
+                String result = flowFeign.get(Dict.URL_JOB_DATAVIEW, jobParams);
 
                 JSONObject resultObject = JSON.parseObject(result);
                 Integer retCode = resultObject.getInteger(Dict.RETCODE);
@@ -499,30 +497,8 @@ public class JobManagerService {
         }
     }
 
-    public String generateURLParam(Map<String, Object> params) {
-        StringBuilder sb = new StringBuilder("?");
-        for (String key : params.keySet()) {
-            Object obj = params.get(key);
-            if (obj instanceof List) {
-                List<Object> list = (List) obj;
-                for (Object v : list) {
-                    sb.append(key);
-                    sb.append("=");
-                    sb.append(v);
-                    sb.append("&");
-                }
-                continue;
-            }
-            sb.append(key);
-            sb.append("=");
-            sb.append(obj);
-            sb.append("&");
-        }
-        String result = sb.substring(0, sb.length() - 1);
-        return params == null ? null : result;
-    }
 
-    public String generateURLParamJobQueryDTO(JobQueryDTO jobQueryDTO) {
+    public Map<String, Object> generateURLParamJobQueryDTO(JobQueryDTO jobQueryDTO) {
         Map<String, Object> reqMap = new HashMap<>();
         if (!StringUtils.hasText(jobQueryDTO.getJob_id())) {
             reqMap.put(Dict.JOBID, jobQueryDTO.getJob_id());
@@ -533,6 +509,6 @@ public class JobManagerService {
         if (!StringUtils.hasText(jobQueryDTO.getRole())) {
             reqMap.put(Dict.ROLE, jobQueryDTO.getRole());
         }
-        return generateURLParam(reqMap);
+        return reqMap;
     }
 }

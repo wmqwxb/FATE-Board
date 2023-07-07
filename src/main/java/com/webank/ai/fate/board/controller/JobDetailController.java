@@ -20,14 +20,15 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.base.Preconditions;
+import com.webank.ai.fate.board.global.Dict;
 import com.webank.ai.fate.board.global.ErrorCode;
 import com.webank.ai.fate.board.global.ResponseResult;
 import com.webank.ai.fate.board.log.LogFileService;
 import com.webank.ai.fate.board.pojo.*;
 import com.webank.ai.fate.board.services.FlowFeign;
 import com.webank.ai.fate.board.services.JobDetailService;
+import com.webank.ai.fate.board.services.JobManagerService;
 import com.webank.ai.fate.board.services.TaskManagerService;
-import com.webank.ai.fate.board.global.Dict;
 import com.webank.ai.fate.board.utils.ResponseUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -61,6 +62,9 @@ public class JobDetailController {
     @Autowired
     JobDetailService jobDetailService;
 
+    @Autowired
+    JobManagerService jobManagerService;
+
     @Value("${fateflow.url}")
     String fateUrl;
 
@@ -80,6 +84,8 @@ public class JobDetailController {
 
         String result;
         try {
+
+            //generateURLParamJobQueryDTO
             result = flowFeign.post(Dict.URL_COPONENT_METRIC, JSON.toJSONString(componentQueryDTO));
         } catch (Exception e) {
             logger.error("connect fateflow error:", e);
